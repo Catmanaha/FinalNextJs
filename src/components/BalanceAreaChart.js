@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import { balanceHistory } from "@/data/balanceHistory";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     AreaChart,
     Area,
@@ -12,8 +11,33 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import Card from "./Card";
+import { StyledTitle } from "./StyledComponents";
 
 const BalanceAreaChart = () => {
+    const [balanceHistory, setBalanceHistory] = useState([]);
+
+    useEffect(() => {
+        const fetchBalanceHistory = async () => {
+            try {
+                const response = await fetch("/api/balance-history");
+                const data = await response.json();
+                setBalanceHistory(data.balanceHistory);
+            } catch (error) {
+                console.error("Failed to fetch balance history:", error);
+            }
+        };
+
+        fetchBalanceHistory();
+    }, []);
+
+    if (!(balanceHistory.length > 0)) {
+        return (
+            <Card height="276px" width="635px" padding={"30px 25px 30px 20px"}>
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
+
     return (
         <Card height="276px" width="635px" padding={"30px 25px 30px 20px"}>
             <ResponsiveContainer width="100%" height="100%">

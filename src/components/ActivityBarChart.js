@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -8,13 +10,29 @@ import {
     Tooltip,
     Legend,
 } from "chart.js";
-import { activities } from "@/data/activities";
 import Card from "./Card";
 import styled from "styled-components";
+import { StyledTitle } from "./StyledComponents";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const ActivityBarChart = () => {
+    const [activities, setActivities] = useState([]);
+
+    useEffect(() => {
+        const fetchActivities = async () => {
+            try {
+                const response = await fetch("/api/activities");
+                const data = await response.json();
+                setActivities(data.activities);
+            } catch (error) {
+                console.error("Failed to fetch activities:", error);
+            }
+        };
+
+        fetchActivities();
+    }, []);
+
     const labels = activities.map((activity) => activity.Date);
     const deposits = activities.map((activity) => activity.Deposit);
     const withdraws = activities.map((activity) => activity.Withdraw);
@@ -79,18 +97,17 @@ const ActivityBarChart = () => {
                     stepSize: 100,
                 },
             },
-        }
+        },
     };
 
     return (
         <Card height={"322px"} width={"730px"} padding={"28px 30px 28px 33px"}>
             <StyledMain>
-                <Bar
-                    data={data}
-                    options={{
-                        ...options,
-                    }}
-                />
+                {activities.length > 0 ? (
+                    <Bar data={data} options={options} />
+                ) : (
+                    <StyledTitle>Loading...</StyledTitle>
+                )}
             </StyledMain>
         </Card>
     );

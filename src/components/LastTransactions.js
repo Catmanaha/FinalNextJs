@@ -3,8 +3,34 @@
 import styled from "styled-components";
 import Card from "./Card";
 import { lastTransactions } from "@/data/lastTransactions";
+import { StyledTitle } from "./StyledComponents";
+import { useEffect, useState } from "react";
 
 const LastTransactions = () => {
+    const [transactions, setTransactions] = useState([]);
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                const response = await fetch("/api/last-transactions");
+                const data = await response.json();
+                setTransactions(data.lastTransactions);
+            } catch (error) {
+                console.error("Failed to fetch transactions:", error);
+            }
+        };
+
+        fetchTransactions();
+    }, []);
+
+    if (!(transactions.length > 0)) {
+        return (
+            <Card width="730px" height="235px" padding={"25px"}>
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
+
     return (
         <Card width="730px" height="235px" padding={"25px"}>
             {lastTransactions.map((transaction, index) => (

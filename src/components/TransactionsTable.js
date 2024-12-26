@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { transactions } from "@/data/transactions";
 import Card from "@/components/Card";
+import { StyledTitle } from "./StyledComponents";
 
 const WithdrawalIcon = () => (
     <svg
@@ -39,7 +40,22 @@ const DepositIcon = () => (
 const TransactionsTable = () => {
     const [activeFilter, setActiveFilter] = useState("All");
     const [currentPage, setCurrentPage] = useState(1);
+    const [transactions, setTransactions] = useState([]);
     const itemsPerPage = 5;
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                const response = await fetch('/api/transactions');
+                const data = await response.json();
+                setTransactions(data.transactions);
+            } catch (error) {
+                console.error('Failed to fetch transactions:', error);
+            }
+        };
+
+        fetchTransactions();
+    }, []);
 
     const filteredTransactions = transactions.filter((transaction) => {
         if (activeFilter === "All") return true;
@@ -60,6 +76,14 @@ const TransactionsTable = () => {
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
+
+    if (!(transactions.length > 0)) {
+        return (
+            <Card height="412px" width="635px">
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
 
     return (
         <div>

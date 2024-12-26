@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -12,7 +12,6 @@ import {
     Legend,
 } from "chart.js";
 import Card from "./Card";
-import { debitCredits } from "@/data/debitCredits";
 import styled from "styled-components";
 
 ChartJS.register(
@@ -25,6 +24,34 @@ ChartJS.register(
 );
 
 const DebitCreditOverviewBarChart = () => {
+    const [debitCredits, setDebitCredits] = useState([]);
+
+    useEffect(() => {
+        const fetchDebitCredits = async () => {
+            try {
+                const response = await fetch("/api/debit-credits");
+                const data = await response.json();
+                setDebitCredits(data.debitCredits);
+            } catch (error) {
+                console.error("Failed to fetch debit credits:", error);
+            }
+        };
+
+        fetchDebitCredits();
+    }, []);
+
+    if (!(debitCredits.length > 0)) {
+        return (
+            <Card
+                height={"364px"}
+                width={"730px"}
+                padding={"28px 30px 27px 30px"}
+            >
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
+
     const labels = debitCredits.map((activity) => activity.Date);
     const debits = debitCredits.map((activity) => activity.Debit);
     const credits = debitCredits.map((activity) => activity.Credit);

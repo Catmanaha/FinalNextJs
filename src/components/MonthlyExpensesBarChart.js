@@ -8,16 +8,46 @@ import {
     BarElement,
     Title,
 } from "chart.js";
-import { expensesMonthly } from "@/data/expensesMonthly";
 import Card from "./Card";
 import styled from "styled-components";
+import { StyledTitle } from "./StyledComponents";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title);
 
 const MonthlyExpensesBarChart = () => {
-    const labels = expensesMonthly.map((expense) => expense.Month);
     const [selectedBar, setSelectedBar] = useState(null);
     const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 });
+    const [expensesMonthly, setExpensesMonthly] = useState([]);
+
+    useEffect(() => {
+        const fetchMonthlyExpenses = async () => {
+            try {
+                const response = await fetch("/api/expenses-monthly");
+                const data = await response.json();
+                setExpensesMonthly(data.expensesMonthly);
+            } catch (error) {
+                console.error("Failed to fetch monthly expenses:", error);
+            }
+        };
+
+        fetchMonthlyExpenses();
+    }, []);
+
+    if (!(expensesMonthly.length > 0)) {
+        return (
+            <ChartContainer>
+                <Card
+                    width="350px"
+                    height="225px"
+                    padding={"33px 28px 25px 25px"}
+                >
+                    <StyledTitle>Loading...</StyledTitle>
+                </Card>
+            </ChartContainer>
+        );
+    }
+
+    const labels = expensesMonthly.map((expense) => expense.Month);
 
     const data = {
         labels,

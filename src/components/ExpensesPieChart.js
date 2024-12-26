@@ -1,16 +1,33 @@
-"use client"
+"use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { expenses } from "@/data/expenses";
 import Card from "./Card";
+import { StyledTitle } from "./StyledComponents";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
 
 const ExpensesPieChart = () => {
     const colors = ["#FA00FF", "#FC7900", "#343C6A", "#1814F3"];
+
+    const [expenses, setExpenses] = useState([]);
+
+    useEffect(() => {
+        const fetchExpenses = async () => {
+            try {
+                const response = await fetch("/api/expenses");
+                const data = await response.json();
+                setExpenses(data.expenses);
+            } catch (error) {
+                console.error("Failed to fetch expenses:", error);
+            }
+        };
+
+        fetchExpenses();
+    }, []);
+    
 
     const data = {
         labels: expenses.map((expense) => expense.Title),
@@ -46,6 +63,14 @@ const ExpensesPieChart = () => {
             },
         },
     };
+    
+    if (!(expenses.length > 0)) {
+        return (
+            <Card width={"350px"} height={"322px"} padding={"31px 40px 32px 41px"}>
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
 
     return (
         <Card width={"350px"} height={"322px"} padding={"31px 40px 32px 41px"}>
