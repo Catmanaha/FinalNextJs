@@ -157,15 +157,16 @@ const StyledLogoContainer = styled.div`
 const StyledNav = styled.nav`
     border-right: 1px solid #e6eff5;
     width: 250px;
-    height: 1175px;
+    height: 100%;
+    position: sticky;
+    top: 0;
+    
     ${devices.desktop} {
         width: 250px;
-        height: 1175px;
     }
 
     ${devices.tablet} {
         width: 231px;
-        height: 936px;
     }
 `;
 

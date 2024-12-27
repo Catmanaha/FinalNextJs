@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -13,31 +12,33 @@ import {
 import Card from "./Card";
 import styled from "styled-components";
 import { StyledTitle } from "./StyledComponents";
+import useSWR from "swr";
+import { fetcher } from "@/fetcher";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const ActivityBarChart = () => {
-    const [activities, setActivities] = useState([]);
+    const { data, isLoading } = useSWR("/api/activities", fetcher);
 
-    useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                const response = await fetch("/api/activities");
-                const data = await response.json();
-                setActivities(data.activities);
-            } catch (error) {
-                console.error("Failed to fetch activities:", error);
-            }
-        };
+    if (isLoading) {
+        return (
+            <Card
+                height={"322px"}
+                width={"730px"}
+                padding={"28px 30px 28px 33px"}
+            >
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
 
-        fetchActivities();
-    }, []);
+    const activities = data.activities;
 
     const labels = activities.map((activity) => activity.Date);
     const deposits = activities.map((activity) => activity.Deposit);
     const withdraws = activities.map((activity) => activity.Withdraw);
 
-    const data = {
+    const data2 = {
         labels,
         datasets: [
             {
@@ -103,11 +104,7 @@ const ActivityBarChart = () => {
     return (
         <Card height={"322px"} width={"730px"} padding={"28px 30px 28px 33px"}>
             <StyledMain>
-                {activities.length > 0 ? (
-                    <Bar data={data} options={options} />
-                ) : (
-                    <StyledTitle>Loading...</StyledTitle>
-                )}
+                <Bar data={data2} options={options} />
             </StyledMain>
         </Card>
     );

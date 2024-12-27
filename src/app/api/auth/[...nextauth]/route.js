@@ -11,15 +11,33 @@ const handler = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+                if (!credentials?.email || !credentials?.password) {
+                    throw new Error("Please provide both email and password.");
+                }
+                
                 const user = findUser(credentials.email, credentials.password);
-                if (!user) return null;
+                
+                if (!user) {
+                    throw new Error("CredentialsSignin"); // Custom error code
+                }
+                
                 return { id: user.email, email: user.email };
             },
         }),
     ],
     pages: {
         signIn: "/auth/login",
+    },
+    callbacks: {
+        async signIn({ user }) {
+            if (user) {
+                return true;
+            }
+            return false;
+        },
+        async redirect({ url, baseUrl }) {
+            return baseUrl;
+        },
     },
 });
 

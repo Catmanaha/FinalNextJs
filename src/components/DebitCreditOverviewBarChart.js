@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -13,6 +12,8 @@ import {
 } from "chart.js";
 import Card from "./Card";
 import styled from "styled-components";
+import useSWR from "swr";
+import { fetcher } from "@/fetcher";
 
 ChartJS.register(
     CategoryScale,
@@ -24,23 +25,9 @@ ChartJS.register(
 );
 
 const DebitCreditOverviewBarChart = () => {
-    const [debitCredits, setDebitCredits] = useState([]);
+    const { data, isLoading } = useSWR("/api/debit-credits", fetcher);
 
-    useEffect(() => {
-        const fetchDebitCredits = async () => {
-            try {
-                const response = await fetch("/api/debit-credits");
-                const data = await response.json();
-                setDebitCredits(data.debitCredits);
-            } catch (error) {
-                console.error("Failed to fetch debit credits:", error);
-            }
-        };
-
-        fetchDebitCredits();
-    }, []);
-
-    if (!(debitCredits.length > 0)) {
+    if (isLoading) {
         return (
             <Card
                 height={"364px"}
@@ -52,6 +39,8 @@ const DebitCreditOverviewBarChart = () => {
         );
     }
 
+    const debitCredits = data.debitCredits;
+
     const labels = debitCredits.map((activity) => activity.Date);
     const debits = debitCredits.map((activity) => activity.Debit);
     const credits = debitCredits.map((activity) => activity.Credit);
@@ -59,7 +48,7 @@ const DebitCreditOverviewBarChart = () => {
     const totalDebit = debits.reduce((acc, curr) => acc + curr, 0);
     const totalCredit = credits.reduce((acc, curr) => acc + curr, 0);
 
-    const data = {
+    const data2 = {
         labels,
         datasets: [
             {
@@ -134,7 +123,7 @@ const DebitCreditOverviewBarChart = () => {
             <StyledTitle>{`$${totalDebit.toLocaleString()} Debited & $${totalCredit.toLocaleString()} Credited in this Week`}</StyledTitle>
             <StyledInner>
                 <Bar
-                    data={data}
+                    data={data2}
                     options={{
                         ...options,
                         layout: {

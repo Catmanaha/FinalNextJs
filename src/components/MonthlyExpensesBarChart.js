@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -11,45 +11,30 @@ import {
 import Card from "./Card";
 import styled from "styled-components";
 import { StyledTitle } from "./StyledComponents";
+import useSWR from "swr";
+import { fetcher } from "@/fetcher";
+import {useState} from "react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title);
 
 const MonthlyExpensesBarChart = () => {
     const [selectedBar, setSelectedBar] = useState(null);
     const [labelPosition, setLabelPosition] = useState({ x: 0, y: 0 });
-    const [expensesMonthly, setExpensesMonthly] = useState([]);
+    const { data, isLoading } = useSWR("/api/expenses-monthly", fetcher);
 
-    useEffect(() => {
-        const fetchMonthlyExpenses = async () => {
-            try {
-                const response = await fetch("/api/expenses-monthly");
-                const data = await response.json();
-                setExpensesMonthly(data.expensesMonthly);
-            } catch (error) {
-                console.error("Failed to fetch monthly expenses:", error);
-            }
-        };
-
-        fetchMonthlyExpenses();
-    }, []);
-
-    if (!(expensesMonthly.length > 0)) {
+    if (isLoading) {
         return (
-            <ChartContainer>
-                <Card
-                    width="350px"
-                    height="225px"
-                    padding={"33px 28px 25px 25px"}
-                >
-                    <StyledTitle>Loading...</StyledTitle>
-                </Card>
-            </ChartContainer>
+            <Card width="350px" height="225px" padding={"33px 28px 25px 25px"}>
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
         );
     }
 
+    const expensesMonthly = data.expensesMonthly;
+
     const labels = expensesMonthly.map((expense) => expense.Month);
 
-    const data = {
+    const data2 = {
         labels,
         datasets: [
             {
@@ -121,7 +106,7 @@ const MonthlyExpensesBarChart = () => {
                     style={{
                         marginTop: "20px",
                     }}
-                    data={data}
+                    data={data2}
                     options={options}
                 />
             </Card>

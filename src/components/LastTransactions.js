@@ -4,32 +4,21 @@ import styled from "styled-components";
 import Card from "./Card";
 import { lastTransactions } from "@/data/lastTransactions";
 import { StyledTitle } from "./StyledComponents";
-import { useEffect, useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/fetcher";
 
 const LastTransactions = () => {
-    const [transactions, setTransactions] = useState([]);
+    const { data, isLoading } = useSWR("/api/last-transactions", fetcher);
 
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const response = await fetch("/api/last-transactions");
-                const data = await response.json();
-                setTransactions(data.lastTransactions);
-            } catch (error) {
-                console.error("Failed to fetch transactions:", error);
-            }
-        };
-
-        fetchTransactions();
-    }, []);
-
-    if (!(transactions.length > 0)) {
+    if (isLoading) {
         return (
             <Card width="730px" height="235px" padding={"25px"}>
                 <StyledTitle>Loading...</StyledTitle>
             </Card>
         );
     }
+
+    const lastTransactions = data.lastTransactions;
 
     return (
         <Card width="730px" height="235px" padding={"25px"}>

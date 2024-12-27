@@ -1,9 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import styled from "styled-components";
 import { transactions } from "@/data/transactions";
 import Card from "@/components/Card";
 import { StyledTitle } from "./StyledComponents";
+import useSWR from "swr";
+import { fetcher } from "@/fetcher";
 
 const WithdrawalIcon = () => (
     <svg
@@ -40,22 +43,18 @@ const DepositIcon = () => (
 const TransactionsTable = () => {
     const [activeFilter, setActiveFilter] = useState("All");
     const [currentPage, setCurrentPage] = useState(1);
-    const [transactions, setTransactions] = useState([]);
     const itemsPerPage = 5;
+    const { data, isLoading } = useSWR("/api/transactions", fetcher);
 
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const response = await fetch('/api/transactions');
-                const data = await response.json();
-                setTransactions(data.transactions);
-            } catch (error) {
-                console.error('Failed to fetch transactions:', error);
-            }
-        };
+    if (isLoading) {
+        return (
+            <Card height="412px" width="635px">
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
 
-        fetchTransactions();
-    }, []);
+    const transactions = data.transactions;
 
     const filteredTransactions = transactions.filter((transaction) => {
         if (activeFilter === "All") return true;
@@ -76,14 +75,6 @@ const TransactionsTable = () => {
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
-
-    if (!(transactions.length > 0)) {
-        return (
-            <Card height="412px" width="635px">
-                <StyledTitle>Loading...</StyledTitle>
-            </Card>
-        );
-    }
 
     return (
         <div>
@@ -192,13 +183,14 @@ const FilterContainer = styled.div`
     display: flex;
     margin-bottom: 25px;
     gap: 82px;
-    border-bottom: 1px solid #EBEEF2;
+    border-bottom: 1px solid #ebeef2;
     width: 1110px;
 `;
 
 const FilterButton = styled.button`
     padding: 7px 8px 16px;
-    border-bottom: ${(props) => (props.active === "true" ? "1px solid #1814F3" : "none")};;
+    border-bottom: ${(props) =>
+        props.active === "true" ? "1px solid #1814F3" : "none"};
     font-family: Inter;
     font-size: 16px;
     font-weight: 500;
@@ -237,7 +229,7 @@ const BodyRow = styled.div`
 `;
 
 const HeaderCell = styled.div`
-    color: #718EBF;
+    color: #718ebf;
     font-size: 16px;
     font-weight: 500;
     font-family: Inter;
@@ -281,7 +273,7 @@ const PaginationContainer = styled.div`
 
 const PaginationButton = styled.button`
     padding: 8px 16px;
-    color: #1814F3;
+    color: #1814f3;
     cursor: default;
     font-family: Inter;
     font-size: 15px;
@@ -300,7 +292,6 @@ const PageNumber = styled.button`
     font-weight: 500;
     width: 40px;
     height: 40px;
-
 `;
 
 export default TransactionsTable;

@@ -4,10 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import HorizontalNav from "@/components/HorizontalNav";
-import StyledComponentsRegistry from "./registry";
 import styled from "styled-components";
-import { devices } from "@/styles/breakpoints";
 import { SessionProvider } from "next-auth/react";
+import {devices} from "@/styles/breakpoints";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,10 +29,10 @@ export default function RootLayout({ children }) {
                         <div>
                             <NavBar></NavBar>
                         </div>
-                        <div>
+                        <ContentWrapper>
                             <HorizontalNav />
                             {children}
-                        </div>
+                        </ContentWrapper>
                     </StyledMain>
                 </SessionProvider>
             </body>
@@ -44,4 +43,16 @@ export default function RootLayout({ children }) {
 const StyledMain = styled.main`
     display: flex;
     flex-direction: row;
+    width: 100%;
+`;
+
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+
+    ${devices.tablet} {
+        width: 1124px;
+    }
 `;

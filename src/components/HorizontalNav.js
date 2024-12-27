@@ -123,14 +123,7 @@ const StyledHorizontalNav = styled.nav`
     align-items: center;
     background-color: #ffffff;
     padding: 0 20px;
-
-    ${devices.desktop} {
-        width: 1190px;
-    }
-
-    ${devices.tablet} {
-        width: 100%;
-    }
+    min-height: 100px; /* Add this to ensure consistent height */
 `;
 
 const StyledTitle = styled.h1`

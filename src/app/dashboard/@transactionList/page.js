@@ -1,14 +1,28 @@
 "use client";
 
 import Card from "@/components/Card";
-import {
-    StyledGapBetweenCards,
-    StyledTitle,
-} from "@/components/StyledComponents";
+import { StyledTitle } from "@/components/StyledComponents";
 import Transaction from "@/components/Transaction";
-import { transactions } from "@/data/transactions";
+import { fetcher } from "@/fetcher";
+import useSWR from "swr";
 
 export default function TransactionList() {
+    const { data, isLoading } = useSWR("/api/transactions", fetcher);
+
+    if (isLoading) {
+        return (
+            <Card
+                height={"235px"}
+                width={"350px"}
+                padding={"25px 24px 30px 25px"}
+            >
+                <StyledTitle>Loading...</StyledTitle>
+            </Card>
+        );
+    }
+
+    const transactions = data.transactions;
+
     return (
         <div>
             <StyledTitle>Recent Transaction</StyledTitle>
