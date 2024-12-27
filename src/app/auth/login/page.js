@@ -1,68 +1,76 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
-  const router = useRouter();
-  const [error, setError] = useState(""); // State for error messages
+    const router = useRouter();
+    const [error, setError] = useState(""); 
+    const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    const email = e.target.email.value;
-    const password = e.target.password.value;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    // Reset error state before attempting to sign in
-    setError("");
+        const email = e.target.email.value;
+        const password = e.target.password.value;
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+        setError("");
+        setIsLoading(true); 
 
-    if (result?.ok) {
-      router.push("/dashboard");
-    } else {
-      // Determine the error message based on the error code
-      switch(result?.error) {
-        case "CredentialsSignin":
-          setError("Invalid email or password.");
-          break;
-        case "UserNotFound":
-          setError("User does not exist.");
-          break;
-        // Add more cases as needed based on your authorize function
-        default:
-          setError("An unexpected error occurred. Please try again.");
-      }
-    }
-  };
+        try {
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+            });
 
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Display error message if exists */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      
-      <input
-        name="email"
-        type="email"
-        placeholder="Email"
-        required
-        onChange={() => setError("")} // Clear error on input change
-      />
-      
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        required
-        onChange={() => setError("")} // Clear error on input change
-      />
-      
-      <button type="submit">Login</button>
-    </form>
-  );
+            if (result?.ok) {
+                router.push("/dashboard");
+            } else {
+                switch (result?.error) {
+                    case "CredentialsSignin":
+                        setError("Invalid email or password.");
+                        break;
+                    case "UserNotFound":
+                        setError("User does not exist.");
+                        break;
+                    default:
+                        setError(
+                            "An unexpected error occurred. Please try again."
+                        );
+                }
+                setIsLoading(false);
+            }
+        } catch (err) {
+            setError("An unexpected error occurred.");
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            <input
+                name="email"
+                type="email"
+                placeholder="Email"
+                required
+                onChange={() => setError("")} 
+            />
+
+            <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                required
+                onChange={() => setError("")} 
+            />
+
+            <button type="submit" disabled={isLoading}>
+                {isLoading ? "Loading..." : "Login"} 
+            </button>
+        </form>
+    );
 }

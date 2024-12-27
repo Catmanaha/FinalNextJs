@@ -18,7 +18,7 @@ const handler = NextAuth({
                 const user = findUser(credentials.email, credentials.password);
                 
                 if (!user) {
-                    throw new Error("CredentialsSignin"); // Custom error code
+                    throw new Error("CredentialsSignin");
                 }
                 
                 return { id: user.email, email: user.email };
